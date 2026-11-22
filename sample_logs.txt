@@ -1,0 +1,12 @@
+2026-11-20 08:30:01 INFO Login successful user=manasvi ip=192.168.1.10
+2026-11-20 08:30:05 FAILED Login attempt user=root ip=192.168.1.55
+2026-11-20 08:30:08 FAILED Login attempt user=root ip=192.168.1.55
+2026-11-20 08:30:11 FAILED Login attempt user=admin ip=192.168.1.55
+2026-11-20 08:30:15 FAILED Login attempt user=admin ip=10.0.0.8
+2026-11-20 08:30:20 INFO Login successful user=guest ip=192.168.1.20
+2026-11-20 08:30:25 WARNING Unauthorized access attempt ip=10.0.0.8
+2026-11-20 08:30:30 ERROR Firewall breach detected ip=172.16.0.99
+2026-11-20 08:30:35 FAILED Login attempt user=root ip=192.168.1.55
+2026-11-20 08:30:40 WARNING Suspicious activity detected ip=172.16.0.99
+2026-11-20 08:30:45 INFO System shutdown initiated ip=192.168.1.10
+2026-11-20 08:30:50 FAILED Login attempt user=admin ip=10.0.0.8

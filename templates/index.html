@@ -1,0 +1,273 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CyberTrace | Security Analytics</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0b1120;color:#e2e8f0}
+.layout{display:flex;min-height:100vh}
+.sidebar{width:230px;background:#0d1525;border-right:1px solid #1e293b;padding:24px 16px;position:fixed;height:100vh}
+.logo{font-size:22px;font-weight:800;color:#2dd4bf;margin:8px 10px 5px}
+.sublogo{font-size:11px;color:#64748b;margin:0 10px 35px;letter-spacing:2px}
+.nav-label{font-size:10px;color:#64748b;letter-spacing:1.5px;margin:20px 10px 10px}
+.nav{display:block;padding:12px 14px;border-radius:8px;margin:5px 0;color:#94a3b8;cursor:pointer;font-size:14px}
+.nav:hover,.nav.active{background:#172438;color:#2dd4bf}
+.main{margin-left:230px;width:calc(100% - 230px);padding:30px 35px}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px}
+h1{font-size:25px;margin-bottom:7px}
+.subtitle{color:#94a3b8;font-size:13px}
+.status{font-size:12px;color:#2dd4bf;background:#112a2a;border:1px solid #164e4a;padding:8px 12px;border-radius:20px}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:25px}
+.card{background:#111c2e;border:1px solid #1e293b;border-radius:12px;padding:22px}
+.card-label{font-size:12px;color:#94a3b8;margin-bottom:12px}
+.card-value{font-size:28px;font-weight:750}
+.card-note{font-size:11px;color:#64748b;margin-top:10px}
+.panel{background:#111c2e;border:1px solid #1e293b;border-radius:12px;padding:22px;margin-bottom:22px}
+.panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.panel h2{font-size:16px}
+.badge{font-size:11px;color:#2dd4bf;background:#112a2a;padding:5px 9px;border-radius:6px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;color:#64748b;font-weight:500;padding:12px;border-bottom:1px solid #253349}
+td{padding:13px 12px;border-bottom:1px solid #1e293b;color:#cbd5e1}
+tr:hover{background:#152236}
+.level{padding:4px 8px;border-radius:5px;font-size:11px;font-weight:600}
+.INFO{background:#172a45;color:#60a5fa}
+.FAILED{background:#3a1720;color:#fb7185}
+.WARNING{background:#3a2b17;color:#fbbf24}
+.ERROR{background:#451a1a;color:#f87171}
+input,select{background:#0b1120;border:1px solid #263449;border-radius:8px;color:#e2e8f0;padding:11px 13px;outline:none}
+input:focus,select:focus{border-color:#2dd4bf}
+button{background:#0d9488;color:white;border:0;border-radius:8px;padding:11px 16px;cursor:pointer;font-weight:600}
+button:hover{background:#0f766e}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px}
+.toolbar input{flex:1;min-width:200px}
+.rank-row{display:flex;justify-content:space-between;align-items:center;padding:15px 0;border-bottom:1px solid #1e293b}
+.rank-ip{font-family:monospace;font-size:13px}
+.rank-count{color:#fb7185;font-weight:700}
+.empty{padding:25px;text-align:center;color:#64748b}
+.footer{color:#475569;font-size:11px;text-align:center;margin-top:30px}
+.hidden{display:none}
+@media(max-width:1000px){.cards{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.sidebar{width:65px;padding:15px 5px}.logo{font-size:12px}.sublogo,.nav-label{display:none}.nav{text-align:center;padding:12px 4px;font-size:11px}.main{margin-left:65px;width:calc(100% - 65px);padding:18px}.cards{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+<div class="logo">◈ CyberTrace</div>
+<div class="sublogo">SECURITY ANALYTICS</div>
+<div class="nav-label">MAIN MENU</div>
+<div class="nav active" onclick="showSection('dashboard',this)">▦ Dashboard</div>
+<div class="nav" onclick="showSection('logs',this)">▤ Log Explorer</div>
+<div class="nav" onclick="showSection('ips',this)">◉ IP Analysis</div>
+<div class="nav" onclick="showSection('search',this)">⌕ Search</div>
+<div class="nav-label">SYSTEM</div>
+<div class="nav" onclick="showSection('about',this)">ⓘ About</div>
+</aside>
+
+<main class="main">
+<div class="topbar">
+<div>
+<h1 id="pageTitle">Security Dashboard</h1>
+<div class="subtitle">Log analysis and suspicious activity overview</div>
+</div>
+<div class="status">● SYSTEM ONLINE</div>
+</div>
+
+<section id="dashboard">
+<div class="cards">
+<div class="card"><div class="card-label">TOTAL LOG RECORDS</div><div class="card-value" id="totalLogs">—</div><div class="card-note">Records loaded</div></div>
+<div class="card"><div class="card-label">FAILED ATTEMPTS</div><div class="card-value" id="failedLogs">—</div><div class="card-note">Failed authentication events</div></div>
+<div class="card"><div class="card-label">UNIQUE IP ADDRESSES</div><div class="card-value" id="uniqueIPs">—</div><div class="card-note">Distinct IP addresses</div></div>
+<div class="card"><div class="card-label">FLAGGED IPs</div><div class="card-value" id="flaggedIPs">—</div><div class="card-note">IPs with failed attempts</div></div>
+</div>
+
+<div class="panel">
+<div class="panel-head"><h2>Recent Log Activity</h2><span class="badge">LIVE DATA FILE</span></div>
+<div style="overflow-x:auto">
+<table><thead><tr><th>TIMESTAMP</th><th>LEVEL</th><th>IP ADDRESS</th><th>MESSAGE</th></tr></thead>
+<tbody id="recentLogs"></tbody></table>
+</div>
+</div>
+
+<div class="panel">
+<div class="panel-head"><h2>Top IPs by Failed Attempts</h2><span class="badge">HASH ANALYSIS</span></div>
+<div id="topIPs"></div>
+</div>
+</section>
+
+<section id="logs" class="hidden">
+<div class="panel">
+<div class="panel-head"><h2>Log Explorer</h2></div>
+<div class="toolbar"><input id="logFilter" placeholder="Filter logs by IP, message, level..." oninput="filterLogs()"></div>
+<div style="overflow-x:auto">
+<table><thead><tr><th>TIMESTAMP</th><th>LEVEL</th><th>IP ADDRESS</th><th>MESSAGE</th></tr></thead>
+<tbody id="allLogs"></tbody></table>
+</div>
+</div>
+</section>
+
+<section id="ips" class="hidden">
+<div class="panel">
+<div class="panel-head"><h2>Failed Login Analysis</h2><span class="badge">HASHING + SORTING</span></div>
+<div id="ipList"></div>
+</div>
+</section>
+
+<section id="search" class="hidden">
+<div class="panel">
+<div class="panel-head"><h2>IP Address Search</h2></div>
+<div class="toolbar">
+<input id="ipInput" placeholder="Enter IP address">
+<select id="searchAlgo"><option value="linear">Linear Search</option><option value="binary">Binary Search</option></select>
+<button onclick="searchIP()">Search IP</button>
+</div>
+<div id="ipSearchResult" class="empty">Enter an IP address to search the failed-login records.</div>
+</div>
+<div class="panel">
+<div class="panel-head"><h2>Keyword Search</h2><span class="badge">PATTERN SEARCH</span></div>
+<div class="toolbar"><input id="keywordInput" placeholder="Enter keyword..." ><button onclick="searchKeyword()">Search</button></div>
+<div id="keywordResults"></div>
+</div>
+</section>
+
+<section id="about" class="hidden">
+<div class="panel">
+<h2>About CyberTrace</h2><br>
+<p style="color:#94a3b8;line-height:1.8;font-size:14px">
+CyberTrace is an academic suspicious log analyzer built in C++ to demonstrate
+Design and Analysis of Algorithms in log processing.<br><br>
+<strong>Algorithms demonstrated:</strong><br>
+Hashing · Sorting · Linear Search · Binary Search · Rabin-Karp<br><br>
+This interface displays data from the project's simulated log file.
+It is an academic demonstration and not a live threat detection system.
+</p>
+</div>
+</section>
+
+<div class="footer">CYBERTRACE · DAA PROJECT · LOG ANALYSIS SYSTEM</div>
+</main>
+</div>
+
+<script>
+let logs=[];
+
+function showSection(id,el){
+document.querySelectorAll('main section').forEach(s=>s.classList.add('hidden'));
+document.getElementById(id).classList.remove('hidden');
+document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active'));
+el.classList.add('active');
+const titles={dashboard:'Security Dashboard',logs:'Log Explorer',ips:'IP Analysis',search:'Search Center',about:'About CyberTrace'};
+document.getElementById('pageTitle').textContent=titles[id];
+}
+
+function levelBadge(level){
+return `<span class="level ${level}">${level}</span>`;
+}
+
+function renderTable(target,data){
+document.getElementById(target).innerHTML=data.map(l=>
+`<tr><td>${escapeHTML(l.timestamp)}</td><td>${levelBadge(l.level)}</td><td class="rank-ip">${escapeHTML(l.ipAddress)}</td><td>${escapeHTML(l.message)}</td></tr>`
+).join('');
+}
+
+function escapeHTML(s){
+return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function getCounts(){
+let counts={};
+logs.forEach(l=>{
+if(l.level==='FAILED') counts[l.ipAddress]=(counts[l.ipAddress]||0)+1;
+});
+return counts;
+}
+
+function sortedIPs(){
+return Object.entries(getCounts()).sort((a,b)=>b[1]-a[1]);
+}
+
+function renderRanking(target){
+let ranking=sortedIPs();
+document.getElementById(target).innerHTML=ranking.length?ranking.map(([ip,count],i)=>
+`<div class="rank-row"><div><span style="color:#64748b;margin-right:12px">${i+1}</span><span class="rank-ip">${escapeHTML(ip)}</span></div><div class="rank-count">${count} failures</div></div>`
+).join(''):'<div class="empty">No failed login records.</div>';
+}
+
+function updateDashboard(){
+let failed=logs.filter(l=>l.level==='FAILED');
+let unique=new Set(logs.map(l=>l.ipAddress));
+let counts=getCounts();
+document.getElementById('totalLogs').textContent=logs.length;
+document.getElementById('failedLogs').textContent=failed.length;
+document.getElementById('uniqueIPs').textContent=unique.size;
+document.getElementById('flaggedIPs').textContent=Object.keys(counts).length;
+renderTable('recentLogs',logs.slice(-6).reverse());
+renderTable('allLogs',logs);
+renderRanking('topIPs');
+renderRanking('ipList');
+}
+
+function filterLogs(){
+let q=document.getElementById('logFilter').value.toLowerCase();
+renderTable('allLogs',logs.filter(l=>
+l.timestamp.toLowerCase().includes(q)||
+l.level.toLowerCase().includes(q)||
+l.ipAddress.toLowerCase().includes(q)||
+l.message.toLowerCase().includes(q)
+));
+}
+
+function searchIP(){
+let target=document.getElementById('ipInput').value.trim();
+let algo=document.getElementById('searchAlgo').value;
+let arr=sortedIPs();
+let start=performance.now();
+let result=-1;
+
+if(algo==='linear'){
+for(let i=0;i<arr.length;i++){if(arr[i][0]===target){result=i;break;}}
+}else{
+arr=arr.slice().sort((a,b)=>a[0].localeCompare(b[0]));
+let low=0,high=arr.length-1;
+while(low<=high){
+let mid=Math.floor((low+high)/2);
+if(arr[mid][0]===target){result=mid;break;}
+if(arr[mid][0]<target)low=mid+1;else high=mid-1;
+}
+}
+let elapsed=(performance.now()-start).toFixed(4);
+let out=document.getElementById('ipSearchResult');
+if(result!==-1){
+out.innerHTML=`<div style="padding:20px;color:#2dd4bf">IP FOUND<br><br><strong>${escapeHTML(arr[result][0])}</strong><br>Failed attempts: ${arr[result][1]}<br>Search mode: ${algo}<br>UI search time: ${elapsed} ms</div>`;
+}else{
+out.innerHTML=`<div class="empty">IP not found in failed-login records.<br>Search mode: ${algo}<br>UI search time: ${elapsed} ms</div>`;
+}
+}
+
+function searchKeyword(){
+let keyword=document.getElementById('keywordInput').value.trim().toLowerCase();
+if(!keyword){document.getElementById('keywordResults').innerHTML='<div class="empty">Enter a keyword.</div>';return;}
+let matches=logs.filter(l=>l.message.toLowerCase().includes(keyword));
+document.getElementById('keywordResults').innerHTML=matches.length?
+`<div style="margin-bottom:15px;color:#2dd4bf">${matches.length} matching log records</div><div style="overflow-x:auto"><table><thead><tr><th>TIMESTAMP</th><th>LEVEL</th><th>IP</th><th>MESSAGE</th></tr></thead><tbody>${matches.map(l=>`<tr><td>${escapeHTML(l.timestamp)}</td><td>${levelBadge(l.level)}</td><td>${escapeHTML(l.ipAddress)}</td><td>${escapeHTML(l.message)}</td></tr>`).join('')}</tbody></table></div>`:
+'<div class="empty">No matching log records.</div>';
+}
+
+fetch('/api/logs')
+.then(r=>r.json())
+.then(data=>{
+if(data.error)throw new Error(data.error);
+logs=data.logs||[];
+updateDashboard();
+})
+.catch(err=>{
+document.getElementById('totalLogs').textContent='ERR';
+document.getElementById('recentLogs').innerHTML=`<tr><td colspan="4">Failed to load data: ${escapeHTML(err.message)}</td></tr>`;
+});
+</script>
+</body>
+</html>
